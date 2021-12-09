@@ -1,14 +1,3 @@
-# version: '3.4'
-
-# services:
-#   openroadmap:
-#     image: openroadmap
-#     build:
-#       context: .
-#       dockerfile: ./Dockerfile
-#     ports:
-#       - 3000:3000
-
 version: "3.9"
 services:
   db:
@@ -18,10 +7,14 @@ services:
     environment:
       POSTGRES_PASSWORD: password
   web:
-    build: .
+    build:
+      context: .
+      args:
+        USER_ID: "${USER_ID:-1000}"
+        GROUP_ID: "${GROUP_ID:-1000}"
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     volumes:
-      - .:/myapp
+      - .:/openroadmap
     ports:
       - "3000:3000"
     depends_on:
