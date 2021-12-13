@@ -1,0 +1,30 @@
+FROM phusion/passenger-ruby26:2.0.1
+
+ARG APP_DIR
+ARG APP_USER
+
+ENV HOME /root
+ENV APP_HOME $APP_DIR
+
+CMD ["/sbin/my_init"]
+
+RUN apt-get update && apt-get install -y postgresql-client
+# RUN apt-get update && apt-get install -y nodejs npm
+
+WORKDIR $APP_HOME
+
+ADD . $APP_HOME
+
+# Allow permisses for user "app"
+RUN chown -R $APP_USER:$APP_USER $APP_HOME
+
+# Add init scripts
+ADD docker/my_init.d/*.sh /etc/my_init.d/
+# Ensure premissions to execute and Unix newlines
+RUN chmod +x /etc/my_init.d/*.sh && sed -i 's/\r$//' /etc/my_init.d/*.sh
+
+# Ensure permission to execute and Unix newlines on bin files
+# RUN chmod +x /home/app/openroadmap/bin/* && sed -i 's/\r$//' /home/app/openroadmap/bin/*
+
+# Clean APT
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*

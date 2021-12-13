@@ -1,21 +1,28 @@
 version: "3.9"
 services:
-  db:
+  database:
     image: postgres
+    container_name: ${DATABASE_CONTAINER_NAME}
+    environment:
+      # POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./tmp/db:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: password
-  web:
+  app:
+    container_name:  ${APP_CONTAINER_NAME}
     build:
       context: .
+      dockerfile: Dockerfile.dev
       args:
-        USER_ID: "${USER_ID:-1000}"
-        GROUP_ID: "${GROUP_ID:-1000}"
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+        APP_DIR: ${APP_DIR}
+        APP_USER: ${APP_USER}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - .:/openroadmap
+      - .:${APP_DIR}
     ports:
       - "3000:3000"
     depends_on:
-      - db
+      - database
